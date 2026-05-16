@@ -5,9 +5,16 @@
  * ここでは月柱算出に必要な月支の並び等、四柱推命固有のデータ型を足す。
  */
 
-import type { Pillar, Branch } from '../shared/types';
+import type { Pillar, Branch, Stem } from '../shared/types';
 
 export type { Pillar };
+
+/**
+ * 蔵干（地支に内蔵される天干）。
+ * 配列順は [本気, 中気, 余気]（四正・少数支は本気のみ等で 1〜2 個）。
+ * Pillar 本体には載せず、地支から都度導出する（Pillar を純粋に保つ設計判断）。
+ */
+export type HiddenStems = readonly Stem[];
 
 /**
  * 月支の並び：寅月（＝立春起算の第1月）から 丑月（＝小寒）まで。
