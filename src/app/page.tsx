@@ -2,6 +2,7 @@ import type { BirthInfo, Pillar } from "@/engines/shared/types";
 import { getSajuChartFromBirth } from "@/engines/shichu/saju-chart";
 import { getHiddenStems } from "@/engines/shichu/hidden-stems";
 import { getPillarTenStars } from "@/engines/shichu/ten-stars";
+import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
 
 // 湯川研一（運営者）の出生情報。Layer 1 計算エンジンの正典キーケース。
 // この入力に対し、四柱は必ず 年柱=乙巳 / 月柱=戊寅 / 日柱=甲辰 / 時柱=壬申
@@ -58,7 +59,11 @@ function PillarCard({
           {pillar.branch}
         </span>
       </div>
-      <span className="mt-3 text-[0.65rem] tracking-[0.15em] text-[#1A3A5C]/60 sm:text-xs">
+      {/* 十二運（地支の下・ふりがなの上） */}
+      <span className="mt-2 text-[0.65rem] tracking-[0.2em] text-[#1A3A5C]/55 sm:text-xs">
+        {getTwelveFortune(dayStem, pillar.branch)}
+      </span>
+      <span className="mt-2 text-[0.65rem] tracking-[0.15em] text-[#1A3A5C]/60 sm:text-xs">
         {STEM_YOMI[pillar.stem]}・{BRANCH_YOMI[pillar.branch]}
       </span>
       <span className="mt-2 text-[0.6rem] leading-tight tracking-[0.1em] text-[#1A3A5C]/45 sm:text-[0.7rem]">
