@@ -1,6 +1,7 @@
 import type { BirthInfo, Pillar } from "@/engines/shared/types";
 import { getSajuChartFromBirth } from "@/engines/shichu/saju-chart";
 import { getHiddenStems } from "@/engines/shichu/hidden-stems";
+import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 
 // 湯川研一（運営者）の出生情報。Layer 1 計算エンジンの正典キーケース。
 // この入力に対し、四柱は必ず 年柱=乙巳 / 月柱=戊寅 / 日柱=甲辰 / 時柱=壬申
@@ -28,13 +29,28 @@ const BRANCH_YOMI: Record<string, string> = {
   午: "うま", 未: "ひつじ", 申: "さる", 酉: "とり", 戌: "いぬ", 亥: "い",
 };
 
-function PillarCard({ label, pillar }: { label: string; pillar: Pillar }) {
+function PillarCard({
+  label,
+  pillar,
+  dayStem,
+  isDay = false,
+}: {
+  label: string;
+  pillar: Pillar;
+  dayStem: string;
+  isDay?: boolean;
+}) {
+  const tenStars = getPillarTenStars(dayStem, pillar);
   return (
     <div className="flex flex-col items-center">
       <span className="text-[0.7rem] tracking-[0.3em] text-[#1A3A5C]/70 sm:text-xs">
         {label}
       </span>
-      <div className="mt-3 flex w-full flex-col items-center rounded-md border border-[#C8A951]/60 bg-white/70 px-3 py-5 shadow-sm sm:px-5 sm:py-7">
+      {/* 天干の通変星（柱名とカード本体の間）。日柱は日主のため「日干」。 */}
+      <span className="mt-2 text-xs tracking-[0.15em] text-[#1A3A5C]/70 sm:text-sm">
+        {isDay ? "日干" : tenStars.stem}
+      </span>
+      <div className="mt-2 flex w-full flex-col items-center rounded-md border border-[#C8A951]/60 bg-white/70 px-3 py-5 shadow-sm sm:px-5 sm:py-7">
         <span className="text-4xl font-medium leading-none text-[#1A3A5C] sm:text-5xl md:text-6xl">
           {pillar.stem}
         </span>
@@ -47,6 +63,9 @@ function PillarCard({ label, pillar }: { label: string; pillar: Pillar }) {
       </span>
       <span className="mt-2 text-[0.6rem] leading-tight tracking-[0.1em] text-[#1A3A5C]/45 sm:text-[0.7rem]">
         蔵干 {getHiddenStems(pillar.branch).join("・")}
+      </span>
+      <span className="mt-1 text-[0.55rem] leading-tight tracking-[0.1em] text-[#1A3A5C]/70 sm:text-[0.65rem]">
+        {tenStars.hidden.join("・")}
       </span>
     </div>
   );
@@ -82,10 +101,12 @@ export default function Home() {
         />
 
         <div className="mt-10 grid grid-cols-4 gap-2 sm:gap-5">
-          <PillarCard label="年柱" pillar={chart.year} />
-          <PillarCard label="月柱" pillar={chart.month} />
-          <PillarCard label="日柱" pillar={chart.day} />
-          {chart.hour && <PillarCard label="時柱" pillar={chart.hour} />}
+          <PillarCard label="年柱" pillar={chart.year} dayStem={chart.day.stem} />
+          <PillarCard label="月柱" pillar={chart.month} dayStem={chart.day.stem} />
+          <PillarCard label="日柱" pillar={chart.day} dayStem={chart.day.stem} isDay />
+          {chart.hour && (
+            <PillarCard label="時柱" pillar={chart.hour} dayStem={chart.day.stem} />
+          )}
         </div>
 
         <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
