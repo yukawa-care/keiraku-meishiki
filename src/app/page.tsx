@@ -148,7 +148,7 @@ export default function Home() {
       <div className="mt-12 h-px w-16 bg-[#C8A951]" aria-hidden="true" />
 
       <p className="mt-12 text-xs tracking-[0.25em] opacity-80 sm:text-sm">
-        Coming Soon ― 2026年9月リリース予定
+        モニター受付中 ― 2026年9月正式サービス開始予定
       </p>
 
       {/* ── 入力フォーム ── */}
