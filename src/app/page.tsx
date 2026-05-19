@@ -98,9 +98,6 @@ export default function Home() {
   // 初回レンダリングは湯川先生の命式。
   const [chart, setChart] = useState(() => getSajuChartFromBirth(YUKAWA));
 
-  // ユーザーが「計算する」を押したか。押下後はメモ表記を切り替える。
-  const [computed, setComputed] = useState(false);
-
   function handleCalculate() {
     // 札幌の経度（141.3469°E）で経度補正・男性で計算。
     const birth: BirthInfo = {
@@ -114,7 +111,6 @@ export default function Home() {
       gender: "male",
     };
     setChart(getSajuChartFromBirth(birth));
-    setComputed(true);
   }
 
   // input[type=date] / input[type=time] 用の文字列。
@@ -220,18 +216,6 @@ export default function Home() {
             <PillarCard label="時柱" pillar={chart.hour} dayStem={chart.day.stem} />
           )}
         </div>
-
-        {computed ? (
-          <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
-            ※ 札幌・男性で計算しています
-          </p>
-        ) : (
-          <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
-            ※ 湯川研一（運営者）の四柱・参考表示
-            <br />
-            1965年2月19日 15:57 JST／札幌・男性
-          </p>
-        )}
       </section>
     </main>
   );
