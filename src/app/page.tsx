@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import type { BirthInfo, Pillar } from "@/engines/shared/types";
-import { getSajuChartFromBirth } from "@/engines/shichu/saju-chart";
+import {
+  getSajuChartFromBirth,
+} from "@/engines/shichu/saju-chart";
 import { getHiddenStems } from "@/engines/shichu/hidden-stems";
 import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
@@ -13,7 +18,7 @@ const YUKAWA: BirthInfo = {
   day: 19,
   hour: 15,
   minute: 57,
-  longitude: 141.35, // 札幌
+  longitude: 141.3469, // 札幌
   latitude: 43.06,
   gender: "male",
 };
@@ -29,6 +34,11 @@ const BRANCH_YOMI: Record<string, string> = {
   子: "ね", 丑: "うし", 寅: "とら", 卯: "う", 辰: "たつ", 巳: "み",
   午: "うま", 未: "ひつじ", 申: "さる", 酉: "とり", 戌: "いぬ", 亥: "い",
 };
+
+/** ゼロ詰め 2 桁 */
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
 
 function PillarCard({
   label,
@@ -77,8 +87,56 @@ function PillarCard({
 }
 
 export default function Home() {
-  // Server Component：Layer 1 エンジンをサーバーで 1 回だけ実行。
-  const chart = getSajuChartFromBirth(YUKAWA);
+  // フォーム入力値（出生地時計時刻）。初期値は湯川先生。
+  const [year, setYear] = useState(YUKAWA.year);
+  const [month, setMonth] = useState(YUKAWA.month);
+  const [day, setDay] = useState(YUKAWA.day);
+  const [hour, setHour] = useState(YUKAWA.hour);
+  const [minute, setMinute] = useState(YUKAWA.minute);
+
+  // 計算結果（四柱）。Layer 1 は Pure Function なのでクライアントで呼んでよい。
+  // 初回レンダリングは湯川先生の命式。
+  const [chart, setChart] = useState(() => getSajuChartFromBirth(YUKAWA));
+
+  // ユーザーが「計算する」を押したか。押下後はメモ表記を切り替える。
+  const [computed, setComputed] = useState(false);
+
+  function handleCalculate() {
+    // 札幌の経度（141.3469°E）で経度補正・男性で計算。
+    const birth: BirthInfo = {
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      longitude: 141.3469,
+      latitude: 43.06,
+      gender: "male",
+    };
+    setChart(getSajuChartFromBirth(birth));
+    setComputed(true);
+  }
+
+  // input[type=date] / input[type=time] 用の文字列。
+  const dateValue = `${String(year).padStart(4, "0")}-${pad2(month)}-${pad2(day)}`;
+  const timeValue = `${pad2(hour)}:${pad2(minute)}`;
+
+  function handleDateChange(value: string) {
+    const [y, m, d] = value.split("-").map(Number);
+    if (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) {
+      setYear(y);
+      setMonth(m);
+      setDay(d);
+    }
+  }
+
+  function handleTimeChange(value: string) {
+    const [h, mi] = value.split(":").map(Number);
+    if (Number.isFinite(h) && Number.isFinite(mi)) {
+      setHour(h);
+      setMinute(mi);
+    }
+  }
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center bg-[#FAFAF7] px-6 py-16 text-center text-[#1A3A5C] font-[family-name:var(--font-noto-serif-jp)]">
@@ -97,7 +155,56 @@ export default function Home() {
         Coming Soon ― 2026年9月リリース予定
       </p>
 
-      {/* ── 中間チェックポイント：Layer 1 計算エンジンの結実 ── */}
+      {/* ── 入力フォーム ── */}
+      <section className="mt-20 w-full max-w-md">
+        <h2 className="text-sm leading-relaxed tracking-[0.2em] sm:text-base">
+          あなたの生年月日と
+          <wbr />
+          出生時刻を入力してください
+        </h2>
+        <div
+          className="mx-auto mt-4 h-px w-10 bg-[#C8A951]/70"
+          aria-hidden="true"
+        />
+
+        <div className="mt-10 flex flex-col gap-6">
+          <label className="flex flex-col items-start gap-2 text-left">
+            <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">
+              生年月日
+            </span>
+            <input
+              type="date"
+              value={dateValue}
+              onChange={(e) => handleDateChange(e.target.value)}
+              min="1900-01-01"
+              max="2100-12-31"
+              className="w-full rounded-md border border-[#C8A951]/60 bg-white/70 px-4 py-3 text-base text-[#1A3A5C] shadow-sm outline-none focus:border-[#1A3A5C]"
+            />
+          </label>
+
+          <label className="flex flex-col items-start gap-2 text-left">
+            <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">
+              出生時刻
+            </span>
+            <input
+              type="time"
+              value={timeValue}
+              onChange={(e) => handleTimeChange(e.target.value)}
+              className="w-full rounded-md border border-[#C8A951]/60 bg-white/70 px-4 py-3 text-base text-[#1A3A5C] shadow-sm outline-none focus:border-[#1A3A5C]"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={handleCalculate}
+            className="mt-2 rounded-md bg-[#1A3A5C] px-6 py-3 text-sm tracking-[0.3em] text-white shadow-sm transition-opacity hover:opacity-90"
+          >
+            命式を計算する
+          </button>
+        </div>
+      </section>
+
+      {/* ── 命式表（Layer 1 計算エンジンの結実） ── */}
       <section className="mt-20 w-full max-w-2xl">
         <h2 className="text-base tracking-[0.3em] sm:text-lg">命式</h2>
         <div
@@ -114,11 +221,17 @@ export default function Home() {
           )}
         </div>
 
-        <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
-          ※ 湯川研一（運営者）の四柱・参考表示
-          <br />
-          1965年2月19日 15:57 JST／札幌・男性
-        </p>
+        {computed ? (
+          <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
+            ※ 札幌・男性で計算しています
+          </p>
+        ) : (
+          <p className="mt-10 text-[0.65rem] leading-relaxed tracking-[0.15em] text-[#1A3A5C]/55 sm:text-xs">
+            ※ 湯川研一（運営者）の四柱・参考表示
+            <br />
+            1965年2月19日 15:57 JST／札幌・男性
+          </p>
+        )}
       </section>
     </main>
   );
