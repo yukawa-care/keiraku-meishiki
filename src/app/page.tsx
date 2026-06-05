@@ -9,17 +9,16 @@ import { getHiddenStems } from "@/engines/shichu/hidden-stems";
 import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
 
-// 湯川研一（運営者）の出生情報。Layer 1 計算エンジンの正典キーケース。
-// この入力に対し、四柱は必ず 年柱=乙巳 / 月柱=戊寅 / 日柱=甲辰 / 時柱=壬申
-// （いずれも複数の信頼サイトで外部突合済み 2026-05-16）。
-const YUKAWA: BirthInfo = {
-  year: 1965,
-  month: 2,
-  day: 19,
-  hour: 15,
-  minute: 57,
-  longitude: 141.3469, // 札幌
-  latitude: 43.06,
+// Layer 1 計算エンジンのキーテストケース（架空サンプル）。
+// この入力に対し、四柱は 年柱=戊辰 / 月柱=丙辰 / 日柱=庚子 / 時柱=癸未
+const SAMPLE: BirthInfo = {
+  year: 1988,
+  month: 4,
+  day: 15,
+  hour: 14,
+  minute: 30,
+  longitude: 139.6917, // 東京都心
+  latitude: 35.6895,
   gender: "male",
 };
 
@@ -57,7 +56,6 @@ function PillarCard({
       <span className="text-[0.7rem] tracking-[0.3em] text-[#1A3A5C]/70 sm:text-xs">
         {label}
       </span>
-      {/* 天干の通変星（柱名とカード本体の間）。日柱は日主のため「日干」。 */}
       <span className="mt-2 text-xs tracking-[0.15em] text-[#1A3A5C]/70 sm:text-sm">
         {isDay ? "日干" : tenStars.stem}
       </span>
@@ -69,7 +67,6 @@ function PillarCard({
           {pillar.branch}
         </span>
       </div>
-      {/* 十二運（地支の下・ふりがなの上） */}
       <span className="mt-2 text-[0.65rem] tracking-[0.2em] text-[#1A3A5C]/55 sm:text-xs">
         {getTwelveFortune(dayStem, pillar.branch)}
       </span>
@@ -87,33 +84,29 @@ function PillarCard({
 }
 
 export default function Home() {
-  // フォーム入力値（出生地時計時刻）。初期値は湯川先生。
-  const [year, setYear] = useState(YUKAWA.year);
-  const [month, setMonth] = useState(YUKAWA.month);
-  const [day, setDay] = useState(YUKAWA.day);
-  const [hour, setHour] = useState(YUKAWA.hour);
-  const [minute, setMinute] = useState(YUKAWA.minute);
+  const [year, setYear] = useState(SAMPLE.year);
+  const [month, setMonth] = useState(SAMPLE.month);
+  const [day, setDay] = useState(SAMPLE.day);
+  const [hour, setHour] = useState(SAMPLE.hour);
+  const [minute, setMinute] = useState(SAMPLE.minute);
+  const [gender, setGender] = useState<"male" | "female">(SAMPLE.gender);
 
-  // 計算結果（四柱）。Layer 1 は Pure Function なのでクライアントで呼んでよい。
-  // 初回レンダリングは湯川先生の命式。
-  const [chart, setChart] = useState(() => getSajuChartFromBirth(YUKAWA));
+  const [chart, setChart] = useState(() => getSajuChartFromBirth(SAMPLE));
 
   function handleCalculate() {
-    // 札幌の経度（141.3469°E）で経度補正・男性で計算。
     const birth: BirthInfo = {
       year,
       month,
       day,
       hour,
       minute,
-      longitude: 141.3469,
-      latitude: 43.06,
-      gender: "male",
+      longitude: SAMPLE.longitude,
+      latitude: SAMPLE.latitude,
+      gender,
     };
     setChart(getSajuChartFromBirth(birth));
   }
 
-  // input[type=date] / input[type=time] 用の文字列。
   const dateValue = `${String(year).padStart(4, "0")}-${pad2(month)}-${pad2(day)}`;
   const timeValue = `${pad2(hour)}:${pad2(minute)}`;
 
@@ -142,16 +135,15 @@ export default function Home() {
       </h1>
 
       <p className="mt-8 text-sm tracking-[0.2em] sm:text-base md:text-lg">
-        鍼灸師が監修する東洋占術鑑定
+        鍼灸師監修 ─ AI 養生鑑定
       </p>
 
       <div className="mt-12 h-px w-16 bg-[#C8A951]" aria-hidden="true" />
 
       <p className="mt-12 text-xs tracking-[0.25em] opacity-80 sm:text-sm">
-        モニター受付中 ― 2026年9月正式サービス開始予定
+        ゆかわ鍼灸マッサージ治療院 ─ 養生鑑定サービス
       </p>
 
-      {/* ── 入力フォーム ── */}
       <section className="mt-20 w-full max-w-md">
         <h2 className="text-sm leading-relaxed tracking-[0.2em] sm:text-base">
           あなたの生年月日と
@@ -190,6 +182,20 @@ export default function Home() {
             />
           </label>
 
+          <label className="flex flex-col items-start gap-2 text-left">
+            <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">
+              性別
+            </span>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as "male" | "female")}
+              className="w-full rounded-md border border-[#C8A951]/60 bg-white/70 px-4 py-3 text-base text-[#1A3A5C] shadow-sm outline-none focus:border-[#1A3A5C]"
+            >
+              <option value="male">男性</option>
+              <option value="female">女性</option>
+            </select>
+          </label>
+
           <button
             type="button"
             onClick={handleCalculate}
@@ -200,7 +206,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 命式表（Layer 1 計算エンジンの結実） ── */}
       <section className="mt-20 w-full max-w-2xl">
         <h2 className="text-base tracking-[0.3em] sm:text-lg">命式</h2>
         <div
