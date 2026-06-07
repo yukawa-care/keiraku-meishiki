@@ -251,7 +251,7 @@ export default function Home() {
         <p className="mt-3 text-sm leading-loose text-[#1A3A5C]/80 sm:text-base">完全版では、あなたの命式に基づく <strong className="text-[#C8A951]">養生4分野（食事・睡眠・運動・心）</strong>、現在の大運に応じた <strong className="text-[#C8A951]">これから10年の養生方針</strong>、症状別の <strong className="text-[#C8A951]">養生逆引き辞典30項目</strong>、<strong className="text-[#C8A951]">30日養生ワーク</strong> など、約40,000字・100ページにわたる実践マニュアルをお届けします。</p>
         <div className="mt-6 rounded-md border border-[#C8A951] bg-[#C8A951]/10 p-4 text-center text-sm tracking-[0.05em] text-[#C8A951] sm:text-base">ゆかわ鍼灸マッサージ治療院のサービスとして、無料でご提供しています</div>
         <div className="mt-6 text-center">
-          <a href="#" className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
+          <a href="href="https://ssgform.com/s/https://business.form-mailer.jp/fms/6ef3cf1e352260"" className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
         </div>
         <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを5〜10日程度でメールにてお送りします</p>
       </section>
