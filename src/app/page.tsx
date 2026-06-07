@@ -159,6 +159,9 @@ export default function Home() {
       <section className="mt-16 w-full max-w-md">
         <h2 className="text-sm leading-relaxed tracking-[0.2em] sm:text-base">あなたの生年月日と<wbr />出生時刻を入力してください</h2>
         <div className="mx-auto mt-4 h-px w-10 bg-[#C8A951]/70" aria-hidden="true" />
+        <p className="mx-auto mt-6 max-w-sm text-xs leading-relaxed text-[#1A3A5C]/70 sm:text-sm">
+          ※ ご入力いただいた情報は、お客様のブラウザの中で計算されるだけで、当院のサーバーやどこかに送信・保存されることはありません。安心してお試しください。
+        </p>
         <div className="mt-10 flex flex-col gap-6">
           <label className="flex flex-col items-start gap-2 text-left">
             <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">生年月日</span>
@@ -265,7 +268,7 @@ export default function Home() {
       <footer className="mt-20 w-full max-w-2xl border-t border-[#C8A951]/30 pt-10 text-center">
         <p className="text-sm tracking-[0.15em] text-[#C8A951] sm:text-base">ゆかわ鍼灸マッサージ治療院</p>
         <p className="mt-2 text-xs text-[#1A3A5C]/70 sm:text-sm">監修 ・ 鑑定：湯川 研一</p>
-        <p className="mt-1 text-xs text-[#1A3A5C]/70 sm:text-sm">札幌市中央区南17条西9丁目2-23</p>
+        <p className="mt-1 text-xs text-[#1A3A5C]/70 sm:text-sm">札幌市中央区南17条西9丁目2-23-206</p>
         <p className="mt-4 text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">© 2026 湯川 研一　無断複製・再配布を禁じます</p>
       </footer>
     </main>
