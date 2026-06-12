@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import type { BirthInfo, Pillar } from "@/engines/shared/types";
+import { SOLAR_TERMS } from "@/engines/shared/types";
+import { getSolarTermDateTime, jstWallToInstant } from "@/engines/shared/solar-term-calculator";
 import { getSajuChartFromBirth } from "@/engines/shichu/saju-chart";
 import { getHiddenStems } from "@/engines/shichu/hidden-stems";
 import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
+
+// 発行カウンター：研一さんが実数を入れて更新する。0のままなら表示されない。
+const ISSUED_COUNT = 0;
 
 const SAMPLE: BirthInfo = {
   year: 1988, month: 4, day: 15, hour: 14, minute: 30,
@@ -69,10 +74,32 @@ function calcJuniko(dayStem: string, branch: string): string {
 const JUNIKO_GROUP: Record<string, string> = { 長生:"成長期",冠帯:"成長期",建禄:"成長期",帝旺:"充実期",衰:"深化期",病:"深化期",死:"転換期",墓:"転換期",絶:"転換期",胎:"再生期",養:"再生期",沐浴:"浄化期" };
 
 type BigRun = { stem: string; branch: string; tsuhen: string; juniko: string; group: string; ageStart: number; ageEnd: number };
-function computeBigRuns(monthStem: string, monthBranch: string, dayStem: string, yearStem: string, gender: "male" | "female") {
+
+/* 起運年齢の本算出（2026-06-12 完全版＝計算CLIと同一規則に統一）
+   順行=出生→次の節入り／逆行=直前の節入り→出生の日数 ÷ 3、四捨五入・最低1歳 */
+const MS_PER_DAY = 86_400_000;
+const SETSU_DEFS = SOLAR_TERMS.filter((t) => t.kind === "節");
+function calcQiYunAge(birthInstant: Date, forward: boolean): number {
+  const t = birthInstant.getTime();
+  const all: number[] = [];
+  const baseYear = birthInstant.getUTCFullYear();
+  for (const y of [baseYear - 1, baseYear, baseYear + 1]) {
+    for (const s of SETSU_DEFS) all.push(getSolarTermDateTime(y, s.name).getTime());
+  }
+  all.sort((a, b) => a - b);
+  for (let i = 0; i < all.length - 1; i++) {
+    if (all[i] <= t && t < all[i + 1]) {
+      const days = forward ? (all[i + 1] - t) / MS_PER_DAY : (t - all[i]) / MS_PER_DAY;
+      return Math.max(1, Math.round(days / 3));
+    }
+  }
+  return forward ? 7 : 5; // 万一の保険（到達しない想定）
+}
+
+function computeBigRuns(monthStem: string, monthBranch: string, dayStem: string, yearStem: string, gender: "male" | "female", birthInstant: Date) {
   const yearYin = STEM_IS_YIN[yearStem];
   const forward = (gender === "male" && !yearYin) || (gender === "female" && yearYin);
-  const qiYunAge = forward ? 7 : 5;
+  const qiYunAge = calcQiYunAge(birthInstant, forward);
   const mSi = STEMS.indexOf(monthStem), mBi = BRANCHES.indexOf(monthBranch);
   const runs: BigRun[] = [];
   for (let i = 0; i < 10; i++) {
@@ -113,13 +140,21 @@ export default function Home() {
   const [hour, setHour] = useState(SAMPLE.hour);
   const [minute, setMinute] = useState(SAMPLE.minute);
   const [gender, setGender] = useState<"male" | "female">(SAMPLE.gender);
+  const [hourUnknown, setHourUnknown] = useState(false);
   const [chart, setChart] = useState(() => getSajuChartFromBirth(SAMPLE));
   const [currentGender, setCurrentGender] = useState<"male" | "female">(SAMPLE.gender);
+  const [currentBirth, setCurrentBirth] = useState<BirthInfo>(SAMPLE);
+  const [currentHourUnknown, setCurrentHourUnknown] = useState(false);
 
   function handleCalculate() {
-    const birth: BirthInfo = { year, month, day, hour, minute, longitude: SAMPLE.longitude, latitude: SAMPLE.latitude, gender };
+    // 時刻不明のときは正午12:00を仮置き（時柱は表示しない。完全版と同じ規約）
+    const birth: BirthInfo = hourUnknown
+      ? { year, month, day, hour: 12, minute: 0, longitude: SAMPLE.longitude, latitude: SAMPLE.latitude, gender }
+      : { year, month, day, hour, minute, longitude: SAMPLE.longitude, latitude: SAMPLE.latitude, gender };
     setChart(getSajuChartFromBirth(birth));
     setCurrentGender(gender);
+    setCurrentBirth(birth);
+    setCurrentHourUnknown(hourUnknown);
   }
   const dateValue = `${String(year).padStart(4, "0")}-${pad2(month)}-${pad2(day)}`;
   const timeValue = `${pad2(hour)}:${pad2(minute)}`;
@@ -137,7 +172,8 @@ export default function Home() {
   const stemFull = STEM_FULL[dayStem];
   const meridian = STEM_TO_MERIDIAN[dayStem];
   const gogyo = GOGYO_NAME[dayStem];
-  const { runs, forward, qiYunAge } = computeBigRuns(chart.month.stem, chart.month.branch, dayStem, chart.year.stem, currentGender);
+  const birthInstant = jstWallToInstant(currentBirth.year, currentBirth.month, currentBirth.day, currentBirth.hour, currentBirth.minute);
+  const { runs, forward, qiYunAge } = computeBigRuns(chart.month.stem, chart.month.branch, dayStem, chart.year.stem, currentGender, birthInstant);
   const today = new Date();
   let age = today.getFullYear() - year;
   if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
@@ -152,7 +188,7 @@ export default function Home() {
 
       <section className="mt-16 w-full max-w-xl rounded-md border border-[#C8A951]/40 bg-white/60 p-7 text-left shadow-sm">
         <p className="text-sm leading-loose sm:text-base">この鑑定書は、占いではありません。</p>
-        <p className="mt-3 text-sm leading-loose sm:text-base">四柱推命の命式から、あなたの身体の傾向と養生の方針を読み解く ― 札幌の鍼灸師、湯川研一が32年の臨床から書いた、養生の実践書です。</p>
+        <p className="mt-3 text-sm leading-loose sm:text-base">四柱推命の命式から、あなたの身体の傾向と養生の方針を読み解く ― 札幌の鍼灸師、湯川研一が32年の施術経験から書いた、養生の実践書です。</p>
         <p className="mt-3 text-sm leading-loose sm:text-base">下のフォームに生年月日を入れると、<strong className="text-[#C8A951]">あなたの命式・大運・養生方針のサンプル</strong>がご覧いただけます。完全版（100ページ）も無料でお受け取りいただけます。</p>
       </section>
 
@@ -169,7 +205,11 @@ export default function Home() {
           </label>
           <label className="flex flex-col items-start gap-2 text-left">
             <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">出生時刻</span>
-            <input type="time" value={timeValue} onChange={(e) => handleTimeChange(e.target.value)} className="w-full rounded-md border border-[#C8A951]/60 bg-white/70 px-4 py-3 text-base text-[#1A3A5C] shadow-sm outline-none focus:border-[#1A3A5C]" />
+            <input type="time" value={timeValue} onChange={(e) => handleTimeChange(e.target.value)} disabled={hourUnknown} className={`w-full rounded-md border border-[#C8A951]/60 bg-white/70 px-4 py-3 text-base text-[#1A3A5C] shadow-sm outline-none focus:border-[#1A3A5C] ${hourUnknown ? "opacity-40" : ""}`} />
+          </label>
+          <label className="flex items-start gap-3 text-left">
+            <input type="checkbox" checked={hourUnknown} onChange={(e) => setHourUnknown(e.target.checked)} className="mt-1 h-4 w-4 accent-[#C8A951]" />
+            <span className="text-xs leading-relaxed text-[#1A3A5C]/80 sm:text-sm">出生時刻がわかりません<br /><span className="text-[0.65rem] text-[#1A3A5C]/60 sm:text-xs">時刻なしの三つの柱で表示します。完全版も、時刻がわからないままお申込みいただけます。</span></span>
           </label>
           <label className="flex flex-col items-start gap-2 text-left">
             <span className="text-xs tracking-[0.2em] text-[#1A3A5C]/70">性別</span>
@@ -186,12 +226,15 @@ export default function Home() {
         <h2 className="text-base tracking-[0.3em] sm:text-lg">命式</h2>
         <div className="mx-auto mt-4 h-px w-10 bg-[#C8A951]/70" aria-hidden="true" />
         <p className="mt-4 text-xs tracking-[0.15em] text-[#1A3A5C]/70 sm:text-sm">日干「<span className="font-medium text-[#C8A951]">{dayStem}</span>」（{stemFull}）・本質経絡：<span className="font-medium text-[#C8A951]">{meridian}</span></p>
-        <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-5">
+        <div className={`mt-8 grid gap-2 sm:gap-5 ${currentHourUnknown ? "grid-cols-3" : "grid-cols-4"}`}>
           <PillarCard label="年柱" pillar={chart.year} dayStem={dayStem} />
           <PillarCard label="月柱" pillar={chart.month} dayStem={dayStem} />
           <PillarCard label="日柱" pillar={chart.day} dayStem={dayStem} isDay />
-          {chart.hour && <PillarCard label="時柱" pillar={chart.hour} dayStem={dayStem} />}
+          {!currentHourUnknown && chart.hour && <PillarCard label="時柱" pillar={chart.hour} dayStem={dayStem} />}
         </div>
+        {currentHourUnknown && (
+          <p className="mt-4 text-[0.65rem] leading-relaxed text-[#1A3A5C]/55 sm:text-xs">※ 時柱（4本目の柱）は、出生時刻がわかる方に表示されます。時刻がわからなくても、本質・経絡・大運は読み解けます。</p>
+        )}
       </section>
 
       {profile && (
@@ -245,18 +288,21 @@ export default function Home() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ 起運年齢は順行7歳・逆行5歳の概算値です（精密版は完全版にて）</p>
+        <p className="mt-3 text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ 起運年齢は、お生まれの日から節入りまでの日数をもとに算出しています（完全版と同じ計算です）</p>
       </section>
 
       <section className="mt-20 w-full max-w-2xl rounded-md border-2 border-[#C8A951] bg-white p-8 text-left shadow-sm">
         <h2 className="text-center text-lg tracking-[0.1em] sm:text-xl">完全版・100ページの養生鑑定書を、無料でお届けします</h2>
         <p className="mt-5 text-sm leading-loose text-[#1A3A5C]/80 sm:text-base">このページに表示したのは、養生鑑定書のほんの入口です。</p>
         <p className="mt-3 text-sm leading-loose text-[#1A3A5C]/80 sm:text-base">完全版では、あなたの命式に基づく <strong className="text-[#C8A951]">養生4分野（食事・睡眠・運動・心）</strong>、現在の大運に応じた <strong className="text-[#C8A951]">これから10年の養生方針</strong>、症状別の <strong className="text-[#C8A951]">養生逆引き辞典30項目</strong>、<strong className="text-[#C8A951]">30日養生ワーク</strong> など、約40,000字・100ページにわたる実践マニュアルをお届けします。</p>
+        {ISSUED_COUNT > 0 && (
+          <p className="mt-5 text-center text-sm tracking-[0.1em] text-[#1A3A5C]/80 sm:text-base">これまでに <strong className="text-[#C8A951]">{ISSUED_COUNT}通</strong> の鑑定書をお届けしました</p>
+        )}
         <div className="mt-6 rounded-md border border-[#C8A951] bg-[#C8A951]/10 p-4 text-center text-sm tracking-[0.05em] text-[#C8A951] sm:text-base">ゆかわ鍼灸マッサージ治療院のサービスとして、無料でご提供しています</div>
         <div className="mt-6 text-center">
           <a href="https://business.form-mailer.jp/fms/6ef3cf1e352260"className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
         </div>
-        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを3〜5日程度でメールにてお送りします</p>
+        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを3〜5日程度でメールにてお送りします<br />※ 出生時刻がわからない方も、お申込みいただけます（フォームでお知らせください）</p>
       </section>
 
       <section className="mt-20 w-full max-w-2xl rounded-md border border-[#C8A951]/30 bg-white/60 p-7 text-left">
