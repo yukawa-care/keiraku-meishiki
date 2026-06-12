@@ -256,7 +256,7 @@ export default function Home() {
         <div className="mt-6 text-center">
           <a href="https://business.form-mailer.jp/fms/6ef3cf1e352260"className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
         </div>
-        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを5〜10日程度でメールにてお送りします</p>
+        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを3〜5日程度でメールにてお送りします</p>
       </section>
 
       <section className="mt-20 w-full max-w-2xl rounded-md border border-[#C8A951]/30 bg-white/60 p-7 text-left">
