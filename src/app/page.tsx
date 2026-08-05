@@ -10,7 +10,7 @@ import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
 
 // 発行カウンター：研一さんが実数を入れて更新する。0のままなら表示されない。
-const ISSUED_COUNT = 2;
+const ISSUED_COUNT = 8;
 
 const SAMPLE: BirthInfo = {
   year: 1988, month: 4, day: 15, hour: 14, minute: 30,
