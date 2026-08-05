@@ -10,7 +10,7 @@ import { getPillarTenStars } from "@/engines/shichu/ten-stars";
 import { getTwelveFortune } from "@/engines/shichu/twelve-fortunes";
 
 // 発行カウンター：研一さんが実数を入れて更新する。0のままなら表示されない。
-const ISSUED_COUNT = 8;
+const ISSUED_COUNT = 2;
 
 const SAMPLE: BirthInfo = {
   year: 1988, month: 4, day: 15, hour: 14, minute: 30,
@@ -304,7 +304,7 @@ export default function Home() {
         <div className="mt-6 text-center">
           <a href="https://business.form-mailer.jp/fms/6ef3cf1e352260"className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
         </div>
-        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを3〜5日程度でメールにてお送りします<br />※ 出生時刻がわからない方も、お申込みいただけます（フォームでお知らせください）</p>
+        <p className="mt-4 text-center text-[0.65rem] text-[#1A3A5C]/50 sm:text-xs">※ お申込み後、PDFを1週間程度でメールにてお送りします<br />※ 出生時刻がわからない方も、お申込みいただけます（フォームでお知らせください）</p>
       </section>
 
       <section className="mt-20 w-full max-w-2xl rounded-md border border-[#C8A951]/30 bg-white/60 p-7 text-left">
