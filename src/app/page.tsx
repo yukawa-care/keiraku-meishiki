@@ -184,11 +184,12 @@ export default function Home() {
       <h1 className="text-5xl font-medium tracking-[0.3em] sm:text-6xl md:text-7xl"><span>経絡</span><span className="text-[#C8A951]">命式</span></h1>
       <p className="mt-8 text-sm tracking-[0.2em] sm:text-base md:text-lg">鍼灸師監修 ─ AI 養生鑑定</p>
       <div className="mt-12 h-px w-16 bg-[#C8A951]" aria-hidden="true" />
-      <p className="mt-12 text-xs tracking-[0.25em] opacity-80 sm:text-sm">ゆかわ鍼灸マッサージ治療院 ─ 養生鑑定サービス</p>
+      <p className="mt-12 text-xs tracking-[0.25em] opacity-80 sm:text-sm">経絡命式 養生鑑定</p>
+      <p className="mt-3 text-xs tracking-[0.2em] opacity-70 sm:text-sm">文・湯川研一（鍼灸師・あん摩マッサージ指圧師）</p>
 
       <section className="mt-16 w-full max-w-xl rounded-md border border-[#C8A951]/40 bg-white/60 p-7 text-left shadow-sm">
         <p className="text-sm leading-loose sm:text-base">この鑑定書は、占いではありません。</p>
-        <p className="mt-3 text-sm leading-loose sm:text-base">四柱推命の命式から、あなたの身体の傾向と養生の方針を読み解く ― 札幌の鍼灸師、湯川研一が32年の施術経験から書いた、養生の実践書です。</p>
+        <p className="mt-3 text-sm leading-loose sm:text-base">四柱推命の命式から、あなたの身体の傾向と養生の方針を読み解く ― 札幌の鍼灸師、湯川研一が長年の施術経験から書いた、養生の実践書です。</p>
         <p className="mt-3 text-sm leading-loose sm:text-base">下のフォームに生年月日を入れると、<strong className="text-[#C8A951]">あなたの命式・大運・養生方針のサンプル</strong>がご覧いただけます。完全版（100ページ）も無料でお受け取りいただけます。</p>
       </section>
 
@@ -298,7 +299,8 @@ export default function Home() {
         {ISSUED_COUNT > 0 && (
           <p className="mt-5 text-center text-sm tracking-[0.1em] text-[#1A3A5C]/80 sm:text-base">これまでに <strong className="text-[#C8A951]">{ISSUED_COUNT}通</strong> の鑑定書をお届けしました</p>
         )}
-        <div className="mt-6 rounded-md border border-[#C8A951] bg-[#C8A951]/10 p-4 text-center text-sm tracking-[0.05em] text-[#C8A951] sm:text-base">ゆかわ鍼灸マッサージ治療院のサービスとして、無料でご提供しています</div>
+        <div className="mt-6 rounded-md border border-[#C8A951] bg-[#C8A951]/10 p-4 text-center text-sm tracking-[0.05em] text-[#C8A951] sm:text-base">「経絡命式」養生鑑定は、無料でご利用いただけます。鍼灸・マッサージの施術とは別のサービスで、施術のお申込みではありません。</div>
+        <p className="mt-3 text-center text-[0.7rem] leading-relaxed text-[#1A3A5C]/60 sm:text-xs">※本鑑定は養生の参考情報です。施術の方針や効果の根拠となるものではありません。</p>
         <div className="mt-6 text-center">
           <a href="https://business.form-mailer.jp/fms/6ef3cf1e352260"className="inline-block rounded-md bg-[#C8A951] px-10 py-4 text-sm tracking-[0.2em] text-white shadow-sm transition-opacity hover:opacity-90 sm:text-base">完全版をお申込みする →</a>
         </div>
