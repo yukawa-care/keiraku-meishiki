@@ -193,7 +193,7 @@ export default function Home() {
         <p className="mt-3 text-sm leading-loose sm:text-base">下のフォームに生年月日を入れると、<strong className="text-[#C8A951]">あなたの命式・大運・養生方針のサンプル</strong>がご覧いただけます。完全版（100ページ）も無料でお受け取りいただけます。</p>
       </section>
 
-      <section className="mt-16 w-full max-w-md">
+      <section id="meishiki" className="mt-16 w-full max-w-md scroll-mt-8">
         <h2 className="text-sm leading-relaxed tracking-[0.2em] sm:text-base">あなたの生年月日と<wbr />出生時刻を入力してください</h2>
         <div className="mx-auto mt-4 h-px w-10 bg-[#C8A951]/70" aria-hidden="true" />
         <p className="mx-auto mt-6 max-w-sm text-xs leading-relaxed text-[#1A3A5C]/70 sm:text-sm">
